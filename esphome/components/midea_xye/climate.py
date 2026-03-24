@@ -1,4 +1,3 @@
-from esphome.core import coroutine
 from esphome import automation
 from esphome.components import climate, sensor, uart, remote_transmitter, number
 from esphome.components.remote_base import CONF_TRANSMITTER_ID
@@ -86,7 +85,7 @@ def register_action(name, type_, schema):
             ac_ = await cg.get_variable(config[CONF_ID])
             var = cg.new_Pvariable(action_id, template_arg)
             cg.add(var.set_parent(ac_))
-            await coroutine(func)(var, config, args)
+            await func(var, config, args)
             return var
 
         return registerer(new_func)
@@ -247,7 +246,6 @@ CONFIG_SCHEMA = cv.All(
     )
     .extend(uart.UART_DEVICE_SCHEMA)
     .extend(cv.COMPONENT_SCHEMA),
-    cv.only_with_arduino,
 )
 
 # Actions
@@ -359,7 +357,6 @@ async def to_code(config):
     var = await climate.new_climate(config)
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
-    await climate.register_climate(var, config)
     cg.add(var.set_period(config[CONF_PERIOD].total_milliseconds))
     cg.add(var.set_response_timeout(config[CONF_TIMEOUT].total_milliseconds))
     cg.add(var.set_use_fahrenheit(config[CONF_USE_FAHRENHEIT]))
